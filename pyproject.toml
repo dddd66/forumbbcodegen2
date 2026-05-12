@@ -1,0 +1,30 @@
+[project]
+name = "forumbbcodegen2"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pymediainfo==7.0.1",
+    "pyside6==6.11.0",
+]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.20.0",
+    "ruff>=0.15.12",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E", # pep8
+    "F", # bugs
+    "I", #imports
+]
+
+[tool.ruff.format]
+quote-style = "double"
