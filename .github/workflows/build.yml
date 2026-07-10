@@ -17,16 +17,19 @@ jobs:
   bump-version:
     name: Bump version in pyproject.toml
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       new_version: ${{ steps.bump.outputs.new_version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bump version
         id: bump
         run: |
-          # reads the pyproject version
           CURRENT=$(grep -m1 '^version' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
           echo "Current version: $CURRENT"
 
@@ -51,7 +54,6 @@ jobs:
           echo "New version: $NEW_VERSION"
           echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
-          # updates pyproject
           sed -i "0,/^version = \".*\"/s//version = \"$NEW_VERSION\"/" pyproject.toml
 
       - name: Commit bumped version
@@ -72,30 +74,29 @@ jobs:
           - os: ubuntu-latest
             os-label: Linux x86_64
             artifact-name: mkobbcode-linux-x86_64
-            binary-path: dist/mkobbcode
+            binary-path: dist/mkobbcode-linux-x86_64
 
           - os: windows-latest
             os-label: Windows x64
             artifact-name: mkobbcode-windows-x64.exe
-            binary-path: dist\mkobbcode.exe
+            binary-path: dist\mkobbcode-windows-x64.exe
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout (after version bump)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      # ---------- uv ----------
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: "3.12"
 
@@ -110,21 +111,8 @@ jobs:
       - name: Install project + dev deps (via uv.lock)
         run: uv sync --frozen --dev
 
-      - name: Build with PyInstaller (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          uv run pyinstaller \
-            --onefile \
-            --name mkobbcode \
-            src/main.py
-
-      - name: Build with PyInstaller (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          uv run pyinstaller `
-            --onefile `
-            --name mkobbcode `
-            src/main.py
+      - name: Build with PyInstaller
+        run: uv run python .github/build.py
 
       - name: Rename binary (Linux)
         if: runner.os == 'Linux'
@@ -132,11 +120,10 @@ jobs:
 
       - name: Rename binary (Windows)
         if: runner.os == 'Windows'
-        run: |
-          Move-Item dist\mkobbcode.exe dist\mkobbcode-windows-x64.exe
+        run: Move-Item dist\mkobbcode.exe dist\mkobbcode-windows-x64.exe
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: ${{ matrix.artifact-name }}
           path: dist/${{ matrix.artifact-name }}
@@ -151,19 +138,19 @@ jobs:
 
     steps:
       - name: Download Linux binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.3.0
         with:
           name: mkobbcode-linux-x86_64
           path: dist/
 
       - name: Download Windows binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.3.0
         with:
           name: mkobbcode-windows-x64.exe
           path: dist/
 
       - name: Create release and upload assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.3.2
         with:
           tag_name: v${{ needs.bump-version.outputs.new_version }}
           name: v${{ needs.bump-version.outputs.new_version }}
