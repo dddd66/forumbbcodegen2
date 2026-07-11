@@ -90,7 +90,7 @@ class TMDB(QObject):
 
         return json.loads(bytes(reply.readAll().data()).decode("utf-8"))
 
-    def Fetch(self, tmdb_id: str | int, media_type: str) -> None:
+    def Fetch(self, tmdb_id: str | int) -> None:
         """
         Fetches title details from TMDB by its ID.
 
@@ -100,10 +100,9 @@ class TMDB(QObject):
         Args:
             tmdb_id (str | int):
                 The TMDB title ID.
-
-            media_type (str):
-                The media type, either "movie" or "tv".
         """
+
+        media_type: str = "movie"
 
         if media_type == "movie":
             url: str = (
@@ -119,17 +118,16 @@ class TMDB(QObject):
             lambda: self.__process_fetch(reply, media_type)
         )
 
-    def __process_fetch(self, reply: QNetworkReply, media_type: str) -> None:
+    def __process_fetch(self, reply: QNetworkReply) -> None:
         """
         Processes the fetch reply and emits arrived_data or error_occurred.
 
         Args:
             reply (QNetworkReply):
                 The finished network reply.
-
-            media_type (str):
-                The media type, either "movie" or "tv".
         """
+
+        media_type: str = "movie"
 
         try:
             j_resp: Any = self.__parse_reply(reply)
@@ -221,7 +219,7 @@ class TMDB(QObject):
         finally:
             reply.deleteLater()
 
-    def Search(self, query: str, media_type: str) -> None:
+    def Search(self, query: str) -> None:
         """
         Searches TMDB for a title and chains into Fetch on success,
         or emits error_occurred if nothing is found.
@@ -232,10 +230,9 @@ class TMDB(QObject):
         Args:
             query (str):
                 The title string to search for.
-
-            media_type (str):
-                The media type, either "movie" or "tv".
         """
+
+        media_type: str = "movie"
 
         url: str = (
             TMDB.BASE_URL
@@ -248,17 +245,16 @@ class TMDB(QObject):
             lambda: self.__process_search(reply, media_type)
         )
 
-    def __process_search(self, reply: QNetworkReply, media_type: str) -> None:
+    def __process_search(self, reply: QNetworkReply) -> None:
         """
         Processes the search reply and chains into Fetch on success.
 
         Args:
             reply (QNetworkReply):
                 The finished network reply.
-
-            media_type (str):
-                The media type, either "movie" or "tv".
         """
+
+        media_type: str = "movie"
 
         try:
             j_resp: Any = self.__parse_reply(reply)
