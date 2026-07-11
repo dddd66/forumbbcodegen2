@@ -12,7 +12,7 @@ class IMDB(QObject):
 
     BASE_URL: str = "https://api.imdbapi.dev"
 
-    arrived_data: Signal = Signal(IMDBResult)
+    arrived_data: Signal = Signal(FetchResult)
     error_occurred: Signal = Signal(str)
 
     def __init__(self, imdb_id: str, parent: QObject | None = None):
