@@ -1,5 +1,5 @@
 [project]
-name = "forumbbcodegen2"
+name = "MKO-BBCode"
 version = "0.1.1"
 description = "MKO: Gerador de BBCode"
 readme = "README.md"
