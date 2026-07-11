@@ -18,8 +18,8 @@ from PySide6.QtWidgets import (
 from bbcodegen.helpers import build_movie_form_data
 
 from ..bbcode import generate_bb_code
-from ..media import extract_metadata
-from ..models import LeftFormInput, MovieFormData, MovieMetadata, RightFormInput
+from bbcodegen.utils import MediaInfo, MediaMetadata
+from ..models import LeftFormInput, MovieFormData, RightFormInput
 from .leftsideui import CreateLeftWidget
 from .rightsideui import CreateRightWidget
 
@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
                         error_dialog.warning(self, "Error", error_msg)
                         return
         movie_data: MovieFormData = build_movie_form_data(left, right)
-        movie_metadata: MovieMetadata = self.left_side.get_metadata()
+        movie_metadata: MediaMetadata = self.left_side.get_metadata()
 
         # copy to clipboard
         bbcode: str = generate_bb_code(movie_data, movie_metadata)
@@ -163,7 +163,7 @@ class MainWindow(QMainWindow):
 
         if file_path:
             release_p: Path = Path(file_path)
-            metadata: MovieMetadata | None = extract_metadata(release_p)
+            metadata: MediaMetadata | None = MediaInfo.from_path(release_p)
             if not metadata:
                 return
             self.left_side.bottom_left.vcodec_input.setText(metadata.video_codec)
