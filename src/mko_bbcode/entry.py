@@ -1,6 +1,6 @@
-from bbcodegen.ui.mainwindow import MainWindow
+from mko_bbcode.ui.mainwindow import MainWindow
 from PySide6.QtWidgets import QApplication
-from bbcodegen.utils import Resource
+from mko_bbcode.utils import Resource
 from PySide6.QtGui import QIcon
 import sys
 

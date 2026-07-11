@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bbcodegen.imdb_api import FetchIMDB
+from mko_bbcode.imdb_api import FetchIMDB
 
 from ..helpers import RedTextLabel
 from ..models import LeftFormInput, MovieMetadata

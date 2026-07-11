@@ -15,10 +15,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bbcodegen.helpers import build_movie_form_data
+from mko_bbcode.helpers import build_movie_form_data
 
 from ..bbcode import generate_bb_code
-from bbcodegen.utils import MediaInfo, MediaMetadata
+from mko_bbcode.utils import MediaInfo, MediaMetadata
 from ..models import LeftFormInput, MovieFormData, RightFormInput
 from .leftsideui import CreateLeftWidget
 from .rightsideui import CreateRightWidget
