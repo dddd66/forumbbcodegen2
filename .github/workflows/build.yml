@@ -109,7 +109,7 @@ jobs:
             libegl1 libxkbcommon0 libfontconfig1
 
       - name: Install project + dev deps (via uv.lock)
-        run: uv sync --frozen --dev
+        run: uv sync --dev
 
       - name: Build with PyInstaller
         run: uv run python .github/build.py
