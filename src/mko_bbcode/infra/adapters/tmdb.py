@@ -1,10 +1,9 @@
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PySide6.QtCore import QObject, QUrl, Signal
-from mko_bbcode.core.models import FetchResult
+from mko_bbcode.infra.adapters import FetchResult
 from typing import Any
 import urllib.parse
 import json
-
 
 class TMDB(QObject):
     """

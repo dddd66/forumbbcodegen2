@@ -1,4 +1,3 @@
-from .adapters import FetchResult
-from .models import MovieFormData
+from .form import MovieFormData
 
-__all__ = ["FetchResult"]
+__all__ = ["MovieFormData"]
