@@ -1,5 +1,5 @@
 from langcodes import Language, standardize_tag
-from .models import MovieFormData
+from mko_bbcode.core.models import MovieFormData
 from pathlib import Path
 import re
 
@@ -75,7 +75,7 @@ def _fmt_aspect_ratio(width, height) -> str:
         return "Widescreen (16x9)"
 
 
-def _fmt_video_codec(m_info: str, audio_fmt: str | None, audio_profile: str | None) -> str:
+def _fmt_video_codec(audio_format: str) -> str:
     """
     Resolve the video codec.
     """
@@ -88,15 +88,10 @@ def _fmt_video_codec(m_info: str, audio_fmt: str | None, audio_profile: str | No
         "XVID": "XviD",
         "DIVX": "DivX",
     }
-    upper = (m_info or "").upper()
+    upper = (audio_format or "").upper()
     for key, label in _VIDEO_MAP.items():
         if key in upper:
             return label
-    if audio_fmt and "MPEG" in audio_fmt.upper():
-        _LAYER_MAP = {"Layer 3": "MP3", "Layer 2": "MP2", "Layer 1": "MP1"}
-        return _LAYER_MAP.get(audio_profile or "", m_info)
-    return m_info
-
 
 def _fmt_audio_codec(fmt: str | None) -> str:
     """
@@ -169,7 +164,7 @@ class BBCode:
         container    = _fmt_container(m_info["container"])
         size         = _fmt_size(m_info["file_size"])
         duration_min = str(round(float(m_info["duration_ms"]) / 60_000)) if m_info["duration_ms"] else ""
-        video_codec  = _fmt_video_codec(m_info["video_format"] or "", m_info["audio_format_m_info"], m_info["audio_profile"])
+        video_codec  = _fmt_video_codec(m_info["video_format"])
         video_bitrate = _fmt_bitrate(m_info["video_bit_rate"])
         resolution   = _fmt_resolution(m_info["video_width"], m_info["video_height"], m_info["video_par"])
         aspect_ratio = _fmt_aspect_ratio(m_info["video_width"], m_info["video_height"])
@@ -183,24 +178,24 @@ class BBCode:
         imdb  = match.group() if match else data.imdb_url
 
         bbcode = (
-            f"[tablePrinc]"
-            f"[tr][titMasc]Título do Filme[/titMasc][/tr]"
-            f"[tr]"
-            f"[titTrad]{data.title_br}[/titTrad]"
-            f"[titOri]{data.title}[/titOri]"
-            f"[release]{release}[/release]"
-            f"[/tr]"
-            f"[tr]"
-            f"[posterMasc]Poster[/posterMasc]"
-            f"[sinopseMasc]Sinopse[/sinopseMasc]"
-            f"[/tr]"
-            f"[tr]"
-            f"[poster][posterIma]{data.poster}[/posterIma][/poster]"
-            f"[sinopse]{data.synopsis}[/sinopse]"
-            f"[tableScreen]Screenshots[/tableScreen]"
+            f"[tablePrinc]\n"
+            f"[tr][titMasc]Título do Filme[/titMasc][/tr]\n"
+            f"[tr]\n"
+            f"[titTrad]{data.title_br}[/titTrad]\n"
+            f"[titOri]{data.title}[/titOri]\n"
+            f"[release]{release}[/release]\n"
+            f"[/tr]\n"
+            f"[tr]\n"
+            f"[posterMasc]Poster[/posterMasc]\n"
+            f"[sinopseMasc]Sinopse[/sinopseMasc]\n"
+            f"[/tr]\n"
+            f"[tr]\n"
+            f"[poster][posterIma]{data.poster}[/posterIma][/poster]\n"
+            f"[sinopse]{data.synopsis}[/sinopse]\n"
+            f"[tableScreen]Screenshots[/tableScreen]\n"
         )
 
-        screenshots = data.screenshots.split(",")
+        screenshots = [s.strip() for s in data.screenshots.split(",") if s.strip()]
         for n, shot in enumerate(screenshots):
             if n % 2 == 0:
                 if n != 0:
@@ -211,18 +206,18 @@ class BBCode:
         bbcode += "[/tr]"
 
         bbcode += (
-            f"[closeTab][/closeTab]"
-            f"[/tr]"
-            f"[/tablePrinc]"
-            f"[tablePrinc]"
-            f"[tr]"
-            f"[posterMasc]Elenco[/posterMasc]"
-            f"[infoMasc]Informações sobre o filme[/infoMasc]"
-            f"[infoMasc]Informações sobre o release[/infoMasc]"
-            f"[/tr]"
-            f"[tr]"
-            f"[elenco]{data.cast}[/elenco]"
-            f"[info]"
+            f"[closeTab][/closeTab]\n"
+            f"[/tr]\n"
+            f"[/tablePrinc]\n"
+            f"[tablePrinc]\n"
+            f"[tr]\n"
+            f"[posterMasc]Elenco[/posterMasc]\n"
+            f"[infoMasc]Informações sobre o filme[/infoMasc]\n"
+            f"[infoMasc]Informações sobre o release[/infoMasc]\n"
+            f"[/tr]\n"
+            f"[tr]\n"
+            f"[elenco]{data.cast}[/elenco]\n"
+            f"[info]\n"
             f"[b]Gênero: [/b]{data.genre}\n"
             f"[b]Diretor: [/b]{data.director}\n"
             f"[b]Duração: [/b]{data.duration} minutos\n"
@@ -230,8 +225,8 @@ class BBCode:
             f"[b]País de Origem: [/b]{data.country}\n"
             f"[b]Idioma do Áudio: [/b]{data.audio_language}\n"
             f"[b]IMDB: [/b][url={imdb}]{imdb}[/url]\n"
-            f"[/info]"
-            f"[info]"
+            f"[/info]\n"
+            f"[info]\n"
             f"[b]Qualidade de Vídeo: [/b]{data.quality}\n"
             f"[b]Container: [/b]{container}\n"
             f"[b]Vídeo Codec: [/b]{video_codec}\n"
@@ -242,9 +237,9 @@ class BBCode:
             f"[b]Formato de Tela: [/b]{aspect_ratio}\n"
             f"[b]Frame Rate: [/b]{frame_rate} FPS\n"
             f"[b]Tamanho: [/b]{size}\n"
-            f"[b]Legendas: [/b]{data.subtitles}"
-            f"[/info]"
-            f"[/tr]"
+            f"[b]Legendas: [/b]{data.subtitles}\n"
+            f"[/info]\n"
+            f"[/tr]\n"
         )
 
         if data.awards.strip():
