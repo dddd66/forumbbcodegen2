@@ -1,20 +1,5 @@
 from dataclasses import dataclass
 
-
-@dataclass
-class MovieMetadata:
-    container: str
-    resolution: str
-    aspect_ratio: str
-    video_bitrate: str
-    video_codec: str
-    frame_rate: str
-    size: str
-    release: str
-    audio_codec: str = "-"
-    audio_bitrate: str = "-"
-
-
 @dataclass
 class MovieFormData:
     quality: str
