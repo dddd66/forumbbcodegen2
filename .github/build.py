@@ -9,7 +9,7 @@ assets = [
 ]
 
 PyInstaller.__main__.run([
-    "src/mko_bbcode/entry.py",
+    "src/entry.py",
     "--onefile",
     "--windowed",
     "--name", "mkobbcode",
